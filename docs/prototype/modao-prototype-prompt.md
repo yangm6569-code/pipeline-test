@@ -1,0 +1,50 @@
+# 高校科研管理系统原型图提示词
+
+用于生成一张接近墨刀风格的后台产品原型图，内容基于当前项目：
+
+- 登录页
+- 首页工作台
+- 项目管理
+- 项目审批 / 申请审批
+- 成果管理
+- 报销管理
+- 用户管理
+- 角色管理
+
+建议提示词：
+
+```text
+A WEB-BASED ADMIN DASHBOARD WIREFRAME for a university research management system in Modao style.
+
+Aspects that MUST be followed EXACTLY:
+- LOW-FIDELITY PRODUCT PROTOTYPE, not marketing poster, not glossy dribbble shot
+- grayscale and light blue accents only
+- clean Chinese enterprise SaaS layout
+- desktop admin interface, 1440px wide visual language
+- include 4 prototype boards in one canvas: login page, dashboard page, project management page, approval/reimbursement/user management overview
+- top header + left sidebar navigation layout
+- use wireframe components: input boxes, dropdown filters, table rows, cards, dialog blocks, status tags, pagination
+- page labels and menu labels in Chinese
+
+Screen details that MUST appear:
+- Login board: background illustration area on left, login form card on right, title "高校科研管理系统", username field, password field, login button
+- Dashboard board: top header, left sidebar, four statistic cards, recent notices panel, todo panel
+- Project management board: filter bar, search/reset/export buttons, "新增项目" primary button, large project table, colored status tags, action buttons
+- Management overview board: three cards for "申请审批", "报销管理", "用户/角色管理"
+
+Style references:
+- looks like a Modao / Axure product prototype screenshot
+- soft shadows, rounded cards, lots of whitespace
+- precise UI composition, straight front view
+- enterprise product design, not hand-drawn sketch
+
+Do not include:
+- photorealistic people
+- device mockup frame
+- heavy gradients
+- 3D effects
+- poster typography
+- watermarks
+```
+
+如果使用当前项目里的 `$picture` skill，可优先用 `gemini-2.5-flash-image` 出草稿，再换高质量模型精修。

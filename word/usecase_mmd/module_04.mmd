@@ -1,0 +1,8 @@
+%%{init: {'theme':'default','themeVariables':{'fontSize':'16px'},'flowchart':{'nodeSpacing':28,'rankSpacing':30,'padding':14}}}%%
+flowchart LR
+  A[管理员/教师] --> PD1((查看项目信息))
+  A --> PD2((查看预算执行))
+  A --> PD3((发起报销申请))
+  A --> PD4((查看报销详情))
+  F[文件服务] --> PD5((上传凭证图片))
+  PD3 -. include .-> PD5

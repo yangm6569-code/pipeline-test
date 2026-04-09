@@ -1,0 +1,8 @@
+%%{init: {'theme':'default','themeVariables':{'fontSize':'16px'},'flowchart':{'nodeSpacing':28,'rankSpacing':30,'padding':14}}}%%
+flowchart LR
+  R[审批人/管理员] --> PA1((查询审批任务))
+  R --> PA2((审批通过))
+  R --> PA3((审批拒绝))
+  R --> PA4((填写审批意见))
+  PA2 -. include .-> PA4
+  PA3 -. include .-> PA4

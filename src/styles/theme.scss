@@ -1,0 +1,43 @@
+$primary-color: #9b59b6;
+$primary-light: #a86bc9;
+$primary-dark: #8e44ad;
+$secondary-color: #f8f9fa;
+$background-light: #fafbfc;
+$text-primary: #2c3e50;
+$text-secondary: #7f8c8d;
+
+:root {
+    --el-color-primary: #{$primary-color};
+    --el-color-primary-light: #{$primary-light};
+    --el-color-primary-dark: #{$primary-dark};
+    --el-bg-color: #{$secondary-color};
+    --el-bg-color-page: #{$background-light};
+}
+
+.el-button--primary {
+    --el-button-bg-color: #{$primary-color};
+    --el-button-border-color: #{$primary-color};
+}
+
+.page-container {
+    padding: 20px;
+    background-color: $background-light;
+    min-height: calc(100vh - 60px);
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(155, 89, 182, 0.1);
+    transition: all 0.3s ease;
+
+&:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.2);
+    }
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+}

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "docx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "150be87ff7b18f273ad07da303adb1cf2ca21cc3e76db7a2cf0373405178a278"
+    },
+    "picture": {
+      "source": "spm1001/claude-suite",
+      "sourceType": "github",
+      "computedHash": "080f87537d2be4eb3f0d8a07d0c70ddc315a21201dd8401f52ee77ba624fce52"
+    }
+  }
+}
