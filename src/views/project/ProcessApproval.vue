@@ -194,7 +194,7 @@
                   v-for="(filePath, index) in processDetail.filePaths"
                   :key="`${filePath}-${index}`"
                   class="attachment-card"
-                  @click="downloadAttachment(filePath)"
+                  @click="previewAttachment(filePath)"
                 >
                   <div class="attachment-thumb">
                     <el-icon size="22" color="#3f8cff"><Document /></el-icon>
@@ -203,7 +203,14 @@
                   <div class="attachment-name" :title="getFileNameFromPath(filePath)">
                     {{ getFileNameFromPath(filePath) }}
                   </div>
-                  <div class="attachment-tip">点击下载</div>
+                  <div class="attachment-actions">
+                    <el-button type="primary" link @click.stop="previewAttachment(filePath)">
+                      在线预览
+                    </el-button>
+                    <el-button link @click.stop="downloadAttachment(filePath)">
+                      下载
+                    </el-button>
+                  </div>
                 </div>
               </div>
               <span v-else>-</span>
@@ -215,17 +222,47 @@
           <el-button @click="processDetailVisible = false">关闭</el-button>
         </template>
       </el-dialog>
+
+      <el-dialog
+        v-model="docxPreviewVisible"
+        :title="docxPreviewTitle"
+        width="88%"
+        top="3vh"
+        append-to-body
+        destroy-on-close
+        @closed="resetDocxPreview"
+      >
+        <div v-loading="docxPreviewLoading" class="docx-preview-shell">
+          <div ref="docxPreviewContainer" class="docx-preview-container"></div>
+          <el-empty v-if="!docxPreviewLoading && !docxPreviewRendered" description="No preview content" />
+        </div>
+        <template #footer>
+          <el-button @click="docxPreviewVisible = false">Close</el-button>
+          <el-button
+            v-if="currentPreviewFilePath"
+            type="primary"
+            @click="downloadAttachment(currentPreviewFilePath)"
+          >
+            Download Original
+          </el-button>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // 从正确的包导入图标
 import { Search, Refresh, Document } from '@element-plus/icons-vue'
 import request from '@/api/request'
-import { downloadFileByBlob, getFileNameFromPath as getFileNameFromAbsolutePath } from '@/utils/downLoadpicture'
+import {
+  downloadFileByBlob,
+  getFileBlob,
+  openFileByBlob,
+  getFileNameFromPath as getFileNameFromAbsolutePath
+} from '@/utils/downLoadpicture'
 
 // 查询参数
 const queryParams = ref({
@@ -262,6 +299,12 @@ const approving = ref(false)
 const processDetailVisible = ref(false)
 const detailLoading = ref(false)
 const processDetail = ref(null)
+const docxPreviewVisible = ref(false)
+const docxPreviewLoading = ref(false)
+const docxPreviewRendered = ref(false)
+const docxPreviewTitle = ref('DOCX Preview')
+const currentPreviewFilePath = ref('')
+const docxPreviewContainer = ref(null)
 
 // 获取状态标签类型
 const getStatusType = (status) => {
@@ -306,6 +349,80 @@ const getFileExtension = (filePath) => {
   return fileName.slice(dotIndex + 1).toUpperCase().slice(0, 6)
 }
 
+const getFileExtensionLower = (filePath) => {
+  const fileName = getFileNameFromPath(filePath)
+  const dotIndex = fileName.lastIndexOf('.')
+  if (dotIndex < 0 || dotIndex === fileName.length - 1) {
+    return ''
+  }
+  return fileName.slice(dotIndex + 1).toLowerCase()
+}
+
+const clearDocxPreview = () => {
+  docxPreviewRendered.value = false
+  if (docxPreviewContainer.value) {
+    docxPreviewContainer.value.innerHTML = ''
+  }
+}
+
+const resetDocxPreview = () => {
+  docxPreviewLoading.value = false
+  currentPreviewFilePath.value = ''
+  clearDocxPreview()
+}
+
+const previewDocxAttachment = async (filePath) => {
+  currentPreviewFilePath.value = filePath
+  docxPreviewTitle.value = getFileNameFromPath(filePath)
+  docxPreviewVisible.value = true
+  docxPreviewLoading.value = true
+  clearDocxPreview()
+
+  try {
+    await nextTick()
+
+    const blob = await getFileBlob(filePath)
+    const { renderAsync } = await import('docx-preview')
+
+    if (!docxPreviewContainer.value) {
+      throw new Error('DOCX preview container missing')
+    }
+
+    await renderAsync(blob, docxPreviewContainer.value, null, {
+      className: 'docx-viewer',
+      inWrapper: true,
+      breakPages: true,
+      ignoreLastRenderedPageBreak: false,
+      useBase64URL: true,
+      renderHeaders: true,
+      renderFooters: true,
+      renderFootnotes: true,
+      renderEndnotes: true
+    })
+
+    docxPreviewRendered.value = true
+  } catch (error) {
+    console.error('DOCX 在线预览失败:', error)
+    ElMessage.error('DOCX 在线预览失败')
+    docxPreviewVisible.value = false
+  } finally {
+    docxPreviewLoading.value = false
+  }
+}
+
+const previewAttachment = async (filePath) => {
+  if (!filePath) return
+  try {
+    if (getFileExtensionLower(filePath) === 'docx') {
+      await previewDocxAttachment(filePath)
+      return
+    }
+    await openFileByBlob(filePath)
+  } catch (error) {
+    console.error('在线预览附件失败:', error)
+    ElMessage.error('在线预览附件失败')
+  }
+}
 const downloadAttachment = async (filePath) => {
   if (!filePath) return
   try {
@@ -469,6 +586,10 @@ const confirmApproval = async () => {
 onMounted(() => {
   loadProcesses()
 })
+
+onBeforeUnmount(() => {
+  resetDocxPreview()
+})
 </script>
 
 <style scoped>
@@ -538,9 +659,38 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-.attachment-tip {
+.attachment-actions {
   margin-top: 4px;
-  font-size: 12px;
-  color: #909399;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attachment-actions :deep(.el-button) {
+  padding: 0;
+}
+
+.docx-preview-shell {
+  min-height: 72vh;
+  max-height: 72vh;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at top, rgba(63, 140, 255, 0.12), transparent 38%),
+    linear-gradient(180deg, #f4f8ff 0%, #eef3fb 100%);
+}
+
+.docx-preview-container {
+  min-height: 68vh;
+}
+
+.docx-preview-container :deep(.docx-viewer-wrapper) {
+  padding: 12px 0 28px;
+}
+
+.docx-preview-container :deep(.docx-viewer) {
+  margin: 0 auto 24px;
+  box-shadow: 0 20px 50px rgba(15, 48, 87, 0.14);
 }
 </style>

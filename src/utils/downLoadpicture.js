@@ -19,6 +19,16 @@ export function getFileDownloadUrl(absolutePath) {
   return withToken(`/api/file/download?absolutePath=${encodeURIComponent(absolutePath)}`)
 }
 
+export async function getFileBlob(absolutePath) {
+  if (!absolutePath) return null
+  return request({
+    url: '/file/download',
+    method: 'get',
+    params: { absolutePath },
+    responseType: 'blob'
+  })
+}
+
 // Recommended API: blob mode (always carries Authorization header via axios interceptor)
 export async function getFileViewBlobUrl(absolutePath) {
   if (!absolutePath) return ''
@@ -40,12 +50,7 @@ export async function openFileByBlob(absolutePath) {
 
 export async function downloadFileByBlob(absolutePath, fileName) {
   if (!absolutePath) return
-  const blob = await request({
-    url: '/file/download',
-    method: 'get',
-    params: { absolutePath },
-    responseType: 'blob'
-  })
+  const blob = await getFileBlob(absolutePath)
 
   const blobUrl = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
