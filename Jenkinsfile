@@ -6,12 +6,27 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'yangm6569/gaoxiaokeyan-front'
+        DOCKER_IMAGE = 'yangming93432/gaoxiaokeyan-front'
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'
     }
 
     stages {
-        // 不再需要显式的 Checkout 阶段！Jenkins 自动拉取代码
+        stage('Verify Docker Environment') {
+            steps {
+                sh '''
+                    set -eu
+                    echo "Workspace: $(pwd)"
+
+                    if ! command -v docker >/dev/null 2>&1; then
+                        echo "ERROR: docker CLI not found in the Jenkins agent."
+                        echo "Install Docker CLI in the Jenkins container and mount /var/run/docker.sock."
+                        exit 1
+                    fi
+
+                    docker version
+                '''
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
