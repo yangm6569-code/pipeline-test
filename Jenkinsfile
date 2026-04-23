@@ -1,6 +1,10 @@
 
 pipeline {
     agent any
+
+       triggers {
+           githubPush()   // 当 GitHub 收到 push 事件时触发构建
+       }
     
     environment {
         DOCKER_IMAGE = 'yangm6569/gaoxiaokeyan-front'
