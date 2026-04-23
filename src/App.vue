@@ -23,8 +23,6 @@ import Sidebar from '@/components/Sidebar.vue'
 
 
 
-
-
 const route = useRoute()
 
 const showLayout = computed(() => {
